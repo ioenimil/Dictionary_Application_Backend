@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -43,3 +43,14 @@ class WordListView(APIView):
 
 
 # Logic for performing the other operations
+
+from django.http import Http404
+
+class DeleteWordView(APIView):
+    def delete(self, request, id):
+            word = get_object_or_404(Word, id=id)
+            word.delete()
+            return Response(
+                 {"message": "Word has been deleted successfully."}, 
+                 status=status.HTTP_204_NO_CONTENT
+            )
