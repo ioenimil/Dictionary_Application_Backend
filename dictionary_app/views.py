@@ -44,8 +44,6 @@ class WordListView(APIView):
 
 # Logic for performing the other operations
 
-from django.http import Http404
-
 class DeleteWordView(APIView):
     def delete(self, request, id):
             word = get_object_or_404(Word, id=id)
