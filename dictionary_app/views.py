@@ -64,6 +64,6 @@ class WordSearchView(APIView):
             logger.warning(f"Word '{query}' not found.")  # Log the warning
             return api_response(
                 success=False,
-                message="Word not found!",
+                message="No Definitions Found",
                 status_code=status.HTTP_404_NOT_FOUND
             )
