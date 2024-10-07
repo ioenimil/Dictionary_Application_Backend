@@ -57,7 +57,7 @@ class WordSearchView(APIView):
             )
 
         try:
-            word = Word.objects.get(term=query)
+            word = Word.objects.get(word=query)
             serializer = WordSerializer(word)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Word.DoesNotExist:
