@@ -1,23 +1,29 @@
-# serializers.py for data validation and transformation
-
 from rest_framework import serializers
-from .models import Word
+from .models import Word, PartOfSpeech
 
-# serializer class for Word model
-class WordSerializer(serializers.ModelSerializer):   
+class PartOfSpeechSerializer(serializers.ModelSerializer):
+    examples = serializers.ListField(
+        child=serializers.CharField(max_length=200),
+        allow_empty=True
+    )
+    class Meta:
+        model = PartOfSpeech
+        fields = ('id', 
+                  'part_of_speech', 
+                  'definition', 
+                  'examples', 
+                  'synonyms', 
+                  'antonyms') 
+
+class WordSerializer(serializers.ModelSerializer):
+    meanings = PartOfSpeechSerializer(many=True)
+
     class Meta:
         model = Word
-        fields = (
-            "id",
-            'word', 
-            'definition', 
-            'example',
-            'part_of_speech',
-            'added_on',
-            'updated_on'
-        )
-        
-        read_only_fields = ['added_on', 'updated_on']
-        
 
-    
+    def create(self, validated_data):
+        meanings_data = validated_data.pop('meanings')
+        word = Word.objects.create(**validated_data)
+        for pos_data in meanings_data:
+            PartOfSpeech.objects.create(name=word, **pos_data)
+        return word
