@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Word
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__) # creating a logger object
 
 # Creating a word
 class CreateWordView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         serializer = WordSerializer(data=request.data)
         if serializer.is_valid():
