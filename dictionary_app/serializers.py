@@ -20,7 +20,6 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ['id', 'word', 'meanings']
 
     def create(self, validated_data):
         meanings_data = validated_data.pop('meanings')
