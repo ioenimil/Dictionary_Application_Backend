@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__) # creating a logger object
 
 # Creating a word
 class CreateWordView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     def post(self, request):
         serializer = WordSerializer(data=request.data)
         if serializer.is_valid():
@@ -43,3 +43,9 @@ class WordListView(APIView):
 
 
 # Logic for performing the other operations
+# class EditWordView(APIView):
+#     permission_classes = [AllowAny]
+    
+#     def put(self, request, id):
+#         word = 
+    
