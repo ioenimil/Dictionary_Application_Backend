@@ -1,23 +1,12 @@
 from rest_framework import serializers
-from .models import User, OTP, UserLogout
+from .models import User
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
-from django.core.validators import MaxLengthValidator, MinLengthValidator
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.sites.shortcuts import get_current_site
-from django.utils.encoding import smart_str, force_str
-from django.utils.encoding import smart_bytes
-from django.urls import reverse
-from accounts.utils.email_handler import send_email
-from .utils.password_validator import validate_password_strength
-from .account_decorators.password_decorator import validate_password
-from accounts.utils.error_handler import CustomValidationError
+from Dictionary.utils.password_validator import validate_password_strength
+from Dictionary.utils.error_handler import CustomValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -94,9 +83,6 @@ class UserLoginSerializer(serializers.ModelSerializer):
             raise AuthenticationFailed("Invalid Credentials")
         token = user.tokens()
         
-        
-      
-        
         return {
 
             'email': user.email,
@@ -130,8 +116,8 @@ class LogOutSerializer(serializers.Serializer):
             # If the token is invalid or has expired, return an error
             self.fail('bad_token')
 
-class BlockUserSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+# class BlockUserSerializer(serializers.Serializer):
+#     email = serializers.EmailField()
 
        
 

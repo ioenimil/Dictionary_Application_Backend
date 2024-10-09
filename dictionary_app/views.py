@@ -1,11 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Word
 from .serializers import WordSerializer
-from Dictionary.utils.custom_response import api_response
+from Dictionary.utils.custom_response import APIResponseHandler
 import logging
 
 logger = logging.getLogger(__name__) # creating a logger object
@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__) # creating a logger object
 
 # Creating a word
 class CreateWordView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
+        logger.info(f"Authenticated user: {request.user}")
         serializer = WordSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return api_response(
+            serializer.save(user=request.user)
+            return APIResponseHandler.api_response(
                 success=True,
                 message="Word created successfully",
                 data=serializer.data,
@@ -26,7 +27,7 @@ class CreateWordView(APIView):
             )
             
         logger.error(f"Validation error: {serializer.errors}") # logging the error message in the console
-        return api_response(
+        return APIResponseHandler.api_response(
             success=False,
             message="An error occurred while creating the word. Please check your input.",
             status_code=status.HTTP_400_BAD_REQUEST
@@ -34,7 +35,7 @@ class CreateWordView(APIView):
   
  # Getting all the words   
 class WordListView(APIView):
-    permission_classes = [AllowAny]
+
 
     def get(self, request):
         words = Word.objects.all()
@@ -55,7 +56,6 @@ class DeleteWordView(APIView):
 
 #Words cannot be found
 class WordSearchView(APIView):
-    permission_classes = [AllowAny]
 
     def get(self, request):
         query = request.query_params.get('q')  # Get the search query from the URL parameters

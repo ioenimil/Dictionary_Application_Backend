@@ -19,5 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/', include('dictionary_app.urls')), # adding the url definitions for the dictionary app
+    path('api/v1/', include('dictionary_app.urls')),
+    path('api/auth/', include('accounts.urls')), 
 ]
