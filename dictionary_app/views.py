@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -71,9 +72,28 @@ class WordSearchView(APIView):
             serializer = WordSerializer(word)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Word.DoesNotExist:
-            logger.warning(f"Word '{query}' not found.")  # Log the warning
-            return api_response(
-                success=False,
-                message="No Definitions Found",
-                status_code=status.HTTP_404_NOT_FOUND
-            )
+            logger.warning(f"Word '{query}' not found in the database.")   # Log the warning
+
+            # Call external API for the word meaning
+            api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{query}"  # Replace with your actual API URL
+            try:
+                response = requests.get(api_url)
+                response.raise_for_status()  # Raise an error for bad responses
+
+                 # Process the response from the external API
+                api_data = response.json()
+                if isinstance(api_data, list) and len(api_data) > 0 and 'meanings' in api_data[0]:  # Check structure
+                    return Response(api_data[0]['meanings'], status=status.HTTP_200_OK)
+                else:
+                    return api_response(
+                        success=False,
+                        message="We couldn't find any definitions for the word you entered. Please try again later or search online for more information.",
+                        status_code=status.HTTP_404_NOT_FOUND
+                    )
+            except requests.RequestException as e:
+                logger.error(f"Error fetching from external API: {e}")
+                return api_response(
+                    success=False,
+                    message="We couldn't find any definitions for the word you entered. Please try again later or search online for more information.",
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
