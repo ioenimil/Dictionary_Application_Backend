@@ -17,10 +17,15 @@ class PartOfSpeechSerializer(serializers.ModelSerializer):
 
 class WordSerializer(serializers.ModelSerializer):
     meanings = PartOfSpeechSerializer(many=True)
+    creator = serializers.SerializerMethodField()
 
     class Meta:
         model = Word
-
+        fields = ['creator', 'id', 'word', 'meanings']
+    
+    def get_creator(self, obj):
+        return obj.user.get_name
+    
     def create(self, validated_data):
         meanings_data = validated_data.pop('meanings')
         word = Word.objects.create(**validated_data)

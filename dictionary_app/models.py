@@ -1,10 +1,12 @@
 from django.db import models
 import uuid
-
+from accounts.models import User
 # Create your models here.
 class Word(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False) 
+    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     word = models.CharField(max_length=50)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
 
     def __str__(self):
         return self.word
@@ -33,7 +35,7 @@ class PartOfSpeech(models.Model):
         ('phrase', 'Phrase'),
         
     ]
-
+    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     name = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='meanings')
     part_of_speech = models.CharField(max_length=30, choices=POS_CHOICES)
     definition = models.TextField()

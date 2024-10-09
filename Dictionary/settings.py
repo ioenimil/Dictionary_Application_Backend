@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import environ
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -114,6 +115,36 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# added for authentication
+AUTH_USER_MODEL = 'accounts.User'
+
+# added for the JWT authentication
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES": ("Bearer",),# Optional: refresh tokens can be rotated
+    'BLACKLIST_AFTER_ROTATION': True
+}
+
+REST_FRAMEWORK = {
+    # "EXCEPTION_HANDLER": "accounts.utils.error_handler.custom_error_handler",
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/mintute', # Limit requests for unauthenticated users
+        'user': '10/minute',# Limits requests for authenticated users
+        'login': '5/minute', # Custom limits for login attempts. Change to hours later
+    },
+  
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+  
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -136,3 +167,5 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+APPEND_SLASH = True
