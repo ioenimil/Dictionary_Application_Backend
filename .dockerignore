@@ -1,0 +1,51 @@
+# Python artifacts
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment directories
+venv/
+env/
+.venv/
+
+# Environment variables
+*.env
+*.env.*
+
+# Django-specific files
+db.sqlite3
+/media/
+staticfiles/
+
+# Ignore log files
+*.log
+
+# Ignore compiled translations
+*.mo
+
+# Ignore static and media files (since these are generated in the container)
+static/
+media/
+
+# Ignore any coverage files created during testing
+htmlcov/
+.coverage
+*.cover
+coverage.xml
+
+# Ignore IDE/editor config files
+.vscode/
+.idea/
+
+# Ignore Git repository files
+.git/
+.gitignore
+
+# Ignore Docker configuration files
+Dockerfile
+docker-compose.yml
+
+# Ignore build directories (if applicable)
+build/
+dist/
