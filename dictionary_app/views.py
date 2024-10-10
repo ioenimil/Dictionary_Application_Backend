@@ -47,14 +47,25 @@ class WordListView(APIView):
 # Logic for performing the other operations
 
 class DeleteWordView(APIView):
+    permission_classes = [IsAuthenticated]
     def delete(self, request, id):
+        try:
             word = get_object_or_404(Word, id=id)
             word.delete()
             return Response(
-                 {"message": "Word has been deleted successfully."}, 
-                 status=status.HTTP_204_NO_CONTENT
+                {"message": "Word has been deleted successfully."}, 
+                status=status.HTTP_204_NO_CONTENT
             )
-
+        except Word.DoesNotExist:
+            return Response(
+                {"error": "Word not found."}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"An error occurred: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 #Words cannot be found
 class WordSearchView(APIView):
 
