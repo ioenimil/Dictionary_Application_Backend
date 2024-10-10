@@ -46,7 +46,7 @@ class WordListView(APIView):
 # Logic for performing the other operations
 
 class DeleteWordView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     def delete(self, request, id):
         try:
             word = get_object_or_404(Word, id=id)
@@ -62,7 +62,7 @@ class DeleteWordView(APIView):
             )
         except Exception as e:
             return Response(
-                {"error": f"An error occurred: {str(e)}"}, 
+                {"error": f"{str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 #Words cannot be found

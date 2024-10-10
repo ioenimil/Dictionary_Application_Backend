@@ -2,7 +2,7 @@ from Dictionary.utils.custom_response import APIResponseHandler
 # from django.contrib.auth.tokens import default_token_generator
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSignupSerializer, UserLoginSerializer
 
@@ -34,14 +34,15 @@ class LoginView(APIView):
             )
             
             try:
-                if serializer.is_valid(raise_exception=True):
+                    serializer.is_valid(raise_exception=True)
+                    
                     return APIResponseHandler.api_response(
                     success=True,
                     message="Logged in Successfully",
                     data=serializer.data,
                     status_code=status.HTTP_200_OK
                 )
-            except Exception as e:
+            except serializers.ValidationError as e:
                 return APIResponseHandler.api_response(
                 success=False,
                 message="Login failed. Please correct the following errors:",
