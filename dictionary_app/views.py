@@ -1,7 +1,7 @@
 import requests
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Word
@@ -23,7 +23,6 @@ class CreateWordView(APIView):
             return APIResponseHandler.api_response(
                 success=True,
                 message="Word created successfully",
-                data=serializer.data,
                 status_code=status.HTTP_201_CREATED
             )
             

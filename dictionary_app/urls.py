@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import WordListView, CreateWordView, DeleteWordView, WordSearchView
+from .views import WordListView, CreateWordView, DeleteWordView, WordSearchView, EditWordView
 
 # URL configuration for Dictionary project.
 urlpatterns = [
