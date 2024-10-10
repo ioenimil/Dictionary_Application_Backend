@@ -137,7 +137,7 @@ class EditWordView(APIView):
         try:
             word = Word.objects.get(id=id)
         except Word.DoesNotExist:
-            return api_response(
+            return APIResponseHandler.api_response(
                 success=False,
                 message="Word not found",
                 status_code=status.HTTP_404_NOT_FOUND)
@@ -145,14 +145,14 @@ class EditWordView(APIView):
             serializer = WordSerializer(word, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return api_response(
+                return APIResponseHandler.api_response(
                     success=True,
                     message="Word updated successfully",
                     data=serializer.data,
                     status_code=status.HTTP_200_OK
                 )
             logger.error(f"Validation error: {serializer.errors}")  # logging the error message in the console
-            return api_response(
+            return APIResponseHandler.api_response(
                 success=False,
                 message="An error occurred while updating the word. Please check your input.",
                 status_code=status.HTTP_400_BAD_REQUEST
