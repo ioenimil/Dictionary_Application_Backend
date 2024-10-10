@@ -56,8 +56,6 @@ class DeleteWordView(APIView):
 
 #Words cannot be found
 class WordSearchView(APIView):
-    permission_classes = [IsAuthenticated]
-
     def get(self, request):
         query = request.query_params.get('q')  # Get the search query from the URL parameters
         if not query:
