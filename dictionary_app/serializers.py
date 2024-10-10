@@ -47,15 +47,7 @@ class WordSerializer(serializers.ModelSerializer):
 
             # Add the updated meanings
             for pos_data in meanings_data:
-                PartOfSpeech.objects.create(
-                    word=instance,  # Reference the Word instance
-                    part_of_speech=pos_data.get('part_of_speech'),
-                    definition=pos_data.get('definition'),
-                    examples=pos_data.get('examples', []),  # Default to an empty list if not provided
-                    synonyms=pos_data.get('synonyms', []),
-                    antonyms=pos_data.get('antonyms', [])
-                )
+                PartOfSpeech.objects.create(name=instance, **pos_data)
 
         return instance
-
 
