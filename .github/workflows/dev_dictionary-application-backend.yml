@@ -14,11 +14,7 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     steps:
-    - name: Set environment variable
-      uses: actions/setup-env@v2
-      with:
-        env: SECRET_KEY=${{ secrets.SECRET_KEY }}
-     
+       
     - uses: actions/checkout@v2
 
     - name: Set up Docker Buildx
