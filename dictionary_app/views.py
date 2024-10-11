@@ -35,8 +35,6 @@ class CreateWordView(APIView):
   
  # Getting all the words   
 class WordListView(APIView):
-
-
     def get(self, request):
         words = Word.objects.all()
         serializer = WordSerializer(words, many=True)
@@ -46,6 +44,7 @@ class WordListView(APIView):
 # Logic for performing the other operations
 
 class DeleteWordView(APIView):
+    permission_classes = [IsAuthenticated]
     def delete(self, request, id):
             word = get_object_or_404(Word, id=id)
             word.delete()
@@ -118,7 +117,7 @@ class WordSearchView(APIView):
             )
 
 class EditWordView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, id):
         try:
