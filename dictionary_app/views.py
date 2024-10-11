@@ -7,7 +7,6 @@ from rest_framework.views import APIView
 from .models import Word
 from .serializers import WordSerializer
 from Dictionary.utils.custom_response import APIResponseHandler
-from drf_yasg.utils import swagger_auto_schema
 import logging
 
 logger = logging.getLogger(__name__) # creating a logger object
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__) # creating a logger object
 # Creating a word
 class CreateWordView(APIView):
     permission_classes = [IsAuthenticated]
-    @swagger_auto_schema(request_body=WordSerializer)
     def post(self, request):
         logger.info(f"Authenticated user: {request.user}")
         serializer = WordSerializer(data=request.data)
@@ -37,6 +35,8 @@ class CreateWordView(APIView):
   
  # Getting all the words   
 class WordListView(APIView):
+
+
     def get(self, request):
         words = Word.objects.all()
         serializer = WordSerializer(words, many=True)
@@ -48,23 +48,13 @@ class WordListView(APIView):
 class DeleteWordView(APIView):
     permission_classes = [IsAuthenticated]
     def delete(self, request, id):
-        try:
             word = get_object_or_404(Word, id=id)
             word.delete()
             return Response(
-                {"message": "Word has been deleted successfully."}, 
-                status=status.HTTP_204_NO_CONTENT
+                 {"message": "Word has been deleted successfully."}, 
+                 status=status.HTTP_204_NO_CONTENT
             )
-        except Word.DoesNotExist:
-            return Response(
-                {"error": "Word not found."}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        except Exception as e:
-            return Response(
-                {"error": f"{str(e)}"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+
 #Words cannot be found
 class WordSearchView(APIView):
     def get(self, request):
@@ -130,7 +120,9 @@ class WordSearchView(APIView):
 
 class EditWordView(APIView):
     permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(request_body=WordSerializer)
+
     def put(self, request, id):
         try:
             word = Word.objects.get(id=id)
