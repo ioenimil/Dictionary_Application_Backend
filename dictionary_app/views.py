@@ -24,6 +24,7 @@ class CreateWordView(APIView):
             return APIResponseHandler.api_response(
                 success=True,
                 message="Word created successfully",
+                data=serializer.data,
                 status_code=status.HTTP_201_CREATED
             )
             
