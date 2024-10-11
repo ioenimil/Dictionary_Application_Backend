@@ -67,7 +67,8 @@ class WordSearchView(APIView):
                 message="No search query provided.",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-
+            
+        query = query.lower()
         logger.info(f"Searching for word: {query}")
 
         word = Word.objects.filter(word=query).first()
