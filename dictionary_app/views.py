@@ -37,8 +37,6 @@ class CreateWordView(APIView):
   
  # Getting all the words   
 class WordListView(APIView):
-
-
     def get(self, request):
         words = Word.objects.all()
         serializer = WordSerializer(words, many=True)
@@ -131,8 +129,7 @@ class WordSearchView(APIView):
             )
 
 class EditWordView(APIView):
-    permission_classes = [AllowAny]
-    @swagger_auto_schema(request_body=WordSerializer)
+    permission_classes = [IsAuthenticated]
     def put(self, request, id):
         try:
             word = Word.objects.get(id=id)
