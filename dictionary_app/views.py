@@ -73,7 +73,7 @@ class WordSearchView(APIView):
         word = Word.objects.filter(word=query).first()
         if word:
             serializer = WordSerializer(word)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response([serializer.data], status=status.HTTP_200_OK)  # Wrap in a list to return as an array
 
         # If the word is not found in the database, call the external API
         api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{query}"
@@ -85,26 +85,42 @@ class WordSearchView(APIView):
 
             # Check if we received valid data
             if isinstance(api_data, list) and len(api_data) > 0:
-                meanings = api_data[0].get('meanings', [])
-                phonetics = api_data[0].get('phonetics', [])
+                entry = api_data[0]
 
                 # Collect phonetic information and audio URLs
+                phonetics = entry.get('phonetics', [])
                 phonetic_data = []
                 for phonetic in phonetics:
                     phonetic_info = {
-                        'text': phonetic.get('text'),
-                        'audio': phonetic.get('audio'),
+                        'text': phonetic.get('text', ''),
+                        'audio': phonetic.get('audio', ''),
+                        'sourceUrl': phonetic.get('sourceUrl', ''),
+                        'license': phonetic.get('license', {
+                            'name': 'BY-SA 4.0',
+                            'url': 'https://creativecommons.org/licenses/by-sa/4.0'
+                        })
                     }
                     phonetic_data.append(phonetic_info)
 
-                # Prepare the response data
+                # Collect meanings and format it according to your provided response
+                meanings = entry.get('meanings', [])
+
+                # Prepare the exact response structure you want
                 response_data = {
-                    'word': query, 
+                    'word': query,
                     'phonetics': phonetic_data,
                     'meanings': meanings,
+                    'license': {
+                        'name': 'CC BY-SA 3.0',
+                        'url': 'https://creativecommons.org/licenses/by-sa/3.0'
+                    },
+                    'sourceUrls': entry.get('sourceUrls', [
+                        'https://en.wiktionary.org/wiki/hello'
+                    ])
                 }
 
-                return Response(response_data, status=status.HTTP_200_OK)
+                # Wrap the response in a list to return an array
+                return Response([response_data], status=status.HTTP_200_OK)
 
             else:
                 return APIResponseHandler.api_response(
@@ -120,6 +136,7 @@ class WordSearchView(APIView):
                 message="We couldn't find any definitions for the word you entered.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class EditWordView(APIView):
     permission_classes = [IsAuthenticated]
