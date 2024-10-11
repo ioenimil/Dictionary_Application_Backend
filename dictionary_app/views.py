@@ -98,8 +98,9 @@ class WordSearchView(APIView):
 
                 # Prepare the response data
                 response_data = {
-                    'meanings': meanings,
+                    'word': query, 
                     'phonetics': phonetic_data,
+                    'meanings': meanings,
                 }
 
                 return Response(response_data, status=status.HTTP_200_OK)
