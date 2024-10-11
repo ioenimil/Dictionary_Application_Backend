@@ -3,11 +3,12 @@ from rest_framework.exceptions import ValidationError
 # from django.contrib.auth.tokens import default_token_generator
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UserSignupSerializer, UserLoginSerializer
-
+from drf_yasg.utils import swagger_auto_schema
 class UserRegisterView(APIView):
+    @swagger_auto_schema(request_body=UserSignupSerializer)
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
         try:
@@ -28,6 +29,7 @@ class UserRegisterView(APIView):
     
         
 class LoginView(APIView):   
+    @swagger_auto_schema(request_body=UserLoginSerializer)
     def post(self, request):
         serializer = UserLoginSerializer(
             data=request.data,
