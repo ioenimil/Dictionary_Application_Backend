@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__) # creating a logger object
 # Creating a word
 class CreateWordView(APIView):
     permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(request_body=WordSerializer)
     def post(self, request):
         logger.info(f"Authenticated user: {request.user}")
         serializer = WordSerializer(data=request.data)
@@ -54,7 +55,7 @@ class DeleteWordView(APIView):
             word.delete()
             return Response(
                  {"message": "Word has been deleted successfully."}, 
-                 status=status.HTTP_204_NO_CONTENT
+                 status=status.HTTP_200_OK
             )
 
 #Words cannot be found
@@ -141,9 +142,7 @@ class WordSearchView(APIView):
 
 class EditWordView(APIView):
     permission_classes = [IsAuthenticated]
-
     @swagger_auto_schema(request_body=WordSerializer)
-
     def put(self, request, id):
         try:
             word = Word.objects.get(id=id)
