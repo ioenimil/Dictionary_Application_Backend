@@ -60,85 +60,94 @@ class DeleteWordView(APIView):
 #Words cannot be found
 class WordSearchView(APIView):
     def get(self, request):
-        query = request.query_params.get('q')  # Get the search query from the URL parameters
+        query = request.query_params.get('q')
         if not query:
             return APIResponseHandler.api_response(
                 success=False,
                 message="No search query provided.",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
-            
         query = query.lower()
         logger.info(f"Searching for word: {query}")
-
+        # Check if word is in the local database
         word = Word.objects.filter(word=query).first()
         if word:
             serializer = WordSerializer(word)
-            return Response([serializer.data], status=status.HTTP_200_OK)  # Wrap in a list to return as an array
-
-        # If the word is not found in the database, call the external API
+            return Response([serializer.data], status=status.HTTP_200_OK)
+        # External API request if word is not found in the local database
         api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{query}"
         try:
             response = requests.get(api_url)
             response.raise_for_status()
             api_data = response.json()
-            logger.info(f"External API response: {api_data}")
-
-            # Check if we received valid data
-            if isinstance(api_data, list) and len(api_data) > 0:
-                entry = api_data[0]
-
-                # Collect phonetic information and audio URLs
-                phonetics = entry.get('phonetics', [])
-                phonetic_data = []
-                for phonetic in phonetics:
-                    phonetic_info = {
-                        'text': phonetic.get('text', ''),
-                        'audio': phonetic.get('audio', ''),
-                        'sourceUrl': phonetic.get('sourceUrl', ''),
-                        'license': phonetic.get('license', {
-                            'name': 'BY-SA 4.0',
-                            'url': 'https://creativecommons.org/licenses/by-sa/4.0'
-                        })
-                    }
-                    phonetic_data.append(phonetic_info)
-
-                # Collect meanings and format it according to your provided response
-                meanings = entry.get('meanings', [])
-
-                # Prepare the exact response structure you want
-                response_data = {
-                    'word': query,
-                    'phonetics': phonetic_data,
-                    'meanings': meanings,
-                    'license': {
-                        'name': 'CC BY-SA 3.0',
-                        'url': 'https://creativecommons.org/licenses/by-sa/3.0'
-                    },
-                    'sourceUrls': entry.get('sourceUrls', [
-                        'https://en.wiktionary.org/wiki/hello'
-                    ])
-                }
-
-                # Wrap the response in a list to return an array
-                return Response([response_data], status=status.HTTP_200_OK)
-
-            else:
+            if not api_data or not isinstance(api_data, list):
                 return APIResponseHandler.api_response(
                     success=False,
-                    message="We couldn't find any definitions for the word you entered.",
+                    message="Word not found in the external API. Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again at later time or head to the web instead.",
                     status_code=status.HTTP_404_NOT_FOUND
                 )
-
-        except requests.RequestException as e:
-            logger.error(f"Error fetching from external API: {e}")
+            entry = api_data[0] if api_data else None
+            if not entry:
+                return APIResponseHandler.api_response(
+                    success=False,
+                    message="No Definitions Found.",
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+            phonetics = [
+                {
+                    'text': phonetic.get('text', ''),
+                    'audio': phonetic.get('audio', ''),
+                    'sourceUrl': phonetic.get('sourceUrl', None),
+                    'license': {
+                        'name': phonetic.get('license', {}).get('name', 'BY-SA 4.0'),
+                        'url': phonetic.get('license', {}).get('url', 'https://creativecommons.org/licenses/by-sa/4.0')
+                    } if phonetic.get('license') else {
+                        'name': 'BY-SA 4.0',
+                        'url': 'https://creativecommons.org/licenses/by-sa/4.0'
+                    }
+                }
+                for phonetic in entry.get('phonetics', [])
+            ] or [{'text': '', 'audio': '', 'sourceUrl': None}]
+            # Populate meanings and definitions
+            meanings = []
+            for meaning in entry.get('meanings', []):
+                definitions = [
+                    {
+                        'definition': definition.get('definition', ''),
+                        'synonyms': definition.get('synonyms', []),
+                        'antonyms': definition.get('antonyms', []),
+                        'example': definition.get('example', None)
+                    }
+                    for definition in meaning.get('definitions', [])
+                ] or [{'definition': '', 'synonyms': [], 'antonyms': [], 'example': None}]
+                meanings.append({
+                    'partOfSpeech': meaning.get('partOfSpeech', ''),
+                    'definitions': definitions,
+                    'synonyms': meaning.get('synonyms', []),
+                    'antonyms': meaning.get('antonyms', [])
+                })
+            api_response_data = {
+                'word': query,
+                'phonetics': phonetics,
+                'meanings': meanings or [{'partOfSpeech': '', 'definitions': [{'definition': '', 'synonyms': [], 'antonyms': [], 'example': None}]}],
+                'license': entry.get('license', {'name': 'CC BY-SA 3.0', 'url': 'https://creativecommons.org/licenses/by-sa/3.0'}),
+                'sourceUrls': entry.get('sourceUrls', [f'https://en.wiktionary.org/wiki/{query}'])
+            }
+            return Response([api_response_data], status=status.HTTP_200_OK)
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"External API request failed: {e}")
             return APIResponseHandler.api_response(
                 success=False,
-                message="We couldn't find any definitions for the word you entered.",
+                message="Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again at later time or head to the web instead.",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        except requests.RequestException as e:
+            logger.error(f"External API request failed: {e}")
+            return APIResponseHandler.api_response(
+                success=False,
+                message="Error occurred while fetching definitions.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-
 class EditWordView(APIView):
     permission_classes = [IsAuthenticated]
 
