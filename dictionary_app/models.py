@@ -9,7 +9,7 @@ class License(models.Model):
         return self.name if self.name else "Unnamed License"
 
 class Phonetic(models.Model):
-    text = models.CharField(max_length=100)
+    text = models.URLField(blank=True, default='')
     audio = models.URLField(blank=True, null=True)
     source_url = models.URLField(blank=True, null=True)  
     license = models.ForeignKey(License, on_delete=models.SET_NULL, null=True, related_name='phonetics') 
