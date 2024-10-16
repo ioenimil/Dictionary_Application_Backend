@@ -134,7 +134,7 @@ SIMPLE_JWT = {
 }
 
 REST_FRAMEWORK = {
-    # "EXCEPTION_HANDLER": "accounts.utils.error_handler.custom_error_handler",
+    # 'EXCEPTION_HANDLER': 'your_app.exceptions.custom_exception_handler'
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -179,5 +179,6 @@ APPEND_SLASH = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173',  # React's development server
+    'http://localhost:3000',  # React's development server
     'https://vocab-lookup.netlify.app',  
 ]
