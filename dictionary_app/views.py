@@ -78,6 +78,7 @@ class WordSearchView(APIView):
                 status_code=status.HTTP_400_BAD_REQUEST
             )
 
+
         query = query.lower()
         logger.info(f"Searching for word: {query}")
 
@@ -87,11 +88,16 @@ class WordSearchView(APIView):
             serializer = DictionaryEntrySerializer(dictionary_entry)
             return Response([serializer.data], status=status.HTTP_200_OK)
 
+
+        
+        # External API request if word is not found in the local database
+
         api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{query}"
         try:
             response = requests.get(api_url)
             response.raise_for_status()
             api_data = response.json()
+
 
             if not api_data or not isinstance(api_data, list):
                 return APIResponseHandler.api_response(
@@ -107,7 +113,7 @@ class WordSearchView(APIView):
                     message="No Definitions Found.",
                     status_code=status.HTTP_404_NOT_FOUND
                 )
-
+    
             phonetics = [
                 {
                     'text': phonetic.get('text', ''),
@@ -152,6 +158,7 @@ class WordSearchView(APIView):
                 'sourceUrls': entry.get('sourceUrls', [f'https://en.wiktionary.org/wiki/{query}'])
             }
 
+
             if not meanings:
                 dictionary_entry = DictionaryEntry.objects.filter(word=query).first()
                 if dictionary_entry:
@@ -164,7 +171,9 @@ class WordSearchView(APIView):
             logger.error(f"External API request failed: {e}")
             return APIResponseHandler.api_response(
                 success=False,
+
                 message="Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again later or head to the web instead.",
+
                 status_code=status.HTTP_404_NOT_FOUND
             )
         except requests.RequestException as e:
@@ -174,8 +183,6 @@ class WordSearchView(APIView):
                 message="Error occurred while fetching definitions.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
-# Updating a word
 class EditWordView(APIView):
     permission_classes = [IsAuthenticated]
 
