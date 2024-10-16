@@ -177,8 +177,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APPEND_SLASH = True
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # React's development server
-    'http://localhost:3000',  # React's development server
-    'https://vocab-lookup.netlify.app',  
-]
+CORS_ALLOW_ALL_ORIGINS = True
