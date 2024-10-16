@@ -1,18 +1,24 @@
 from django.db import models
-import uuid
 from accounts.models import User
-# Create your models here.
-class Word(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
-    word = models.CharField(max_length=50)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
+class License(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True) 
+    url = models.URLField(blank=True, null=True)
 
     def __str__(self):
-        return self.word
-    
-class PartOfSpeech(models.Model):
-    POS_CHOICES = [
+        return self.name if self.name else "Unnamed License"
+
+class Phonetic(models.Model):
+    text = models.CharField(max_length=100)
+    audio = models.URLField(blank=True, null=True)
+    source_url = models.URLField(blank=True, null=True)  
+    license = models.ForeignKey(License, on_delete=models.SET_NULL, null=True, related_name='phonetics') 
+
+    def __str__(self):
+        return self.text
+
+class Meaning(models.Model):
+    PART_OF_SPEECH_CHOICES = [
         ('noun', 'Noun'),
         ('verb', 'Verb'),
         ('adjective', 'Adjective'),
@@ -33,15 +39,32 @@ class PartOfSpeech(models.Model):
         ('participle', 'Participle'),
         ('clause', 'Clause'),
         ('phrase', 'Phrase'),
-        
     ]
-    id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
-    name = models.ForeignKey(Word, on_delete=models.CASCADE, related_name='meanings')
-    part_of_speech = models.CharField(max_length=30, choices=POS_CHOICES)
-    definition = models.TextField()
-    examples = models.JSONField(blank=True, null=True, default=list)  
-    synonyms = models.JSONField(blank=True, null=True, default=list)  
-    antonyms = models.JSONField(blank=True, null=True, default=list)
+
+    partOfSpeech = models.CharField(max_length=30, choices=PART_OF_SPEECH_CHOICES)
+    synonyms = models.JSONField(default=list, blank=True)
+    antonyms = models.JSONField(default=list, blank=True)
 
     def __str__(self):
-        return f"{self.name.word} ({self.part_of_speech})"
+        return self.part_of_speech
+
+class Definition(models.Model):
+    meaning = models.ForeignKey(Meaning, on_delete=models.CASCADE, related_name='definitions')
+    definition = models.TextField()
+    synonyms = models.JSONField(default=list, blank=True)
+    antonyms = models.JSONField(default=list, blank=True)
+    example = models.JSONField(default=list, blank=True)
+
+    def __str__(self):
+        return self.definition[:50] 
+
+class DictionaryEntry(models.Model):
+    word = models.CharField(max_length=100, unique=True)  # Ensure word uniqueness
+    phonetics = models.ManyToManyField(Phonetic, related_name='dictionary_entries')
+    meanings = models.ManyToManyField(Meaning, related_name='dictionary_entries')
+    license = models.ForeignKey(License, on_delete=models.SET_NULL, null=True, related_name='dictionary_entries')  # Allow null
+    source_urls = models.JSONField(default=list, blank=True)  # Allow blank and null
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dictionary_entries') 
+
+    def __str__(self):
+        return self.word
