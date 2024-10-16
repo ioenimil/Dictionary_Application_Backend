@@ -27,6 +27,7 @@ class CreateWordView(APIView):
 
     def post(self, request):
         word = request.data.get('word')
+        print(f"Request data: {request.data}") 
         
         if self.check_external_api(word):
             return Response({"error": "Word already exists in the external dictionary."},
@@ -37,7 +38,7 @@ class CreateWordView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
         serializer = DictionaryEntrySerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -68,7 +69,6 @@ class DeleteWordView(APIView):
 
 # Communicating with the External Dictionary API
 class WordSearchView(APIView):
-    permission_classes = [IsAuthenticated]
     def get(self, request):
         query = request.query_params.get('q')
         if not query:
@@ -171,9 +171,7 @@ class WordSearchView(APIView):
             logger.error(f"External API request failed: {e}")
             return APIResponseHandler.api_response(
                 success=False,
-
                 message="Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again later or head to the web instead.",
-
                 status_code=status.HTTP_404_NOT_FOUND
             )
         except requests.RequestException as e:
