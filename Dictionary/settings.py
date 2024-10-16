@@ -177,4 +177,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 APPEND_SLASH = True
 
+
 CORS_ALLOW_ALL_ORIGINS = True
+
