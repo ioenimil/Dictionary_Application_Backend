@@ -85,6 +85,10 @@ class WordSearchView(APIView):
                 message="No search query provided.",
                 status_code=status.HTTP_400_BAD_REQUEST
             )
+            response["Access-Control-Allow-Origin"] = "*"
+            response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+            response["Access-Control-Allow-Headers"] = "Content-Type"
+            return response
 
 
         query = query.lower()
