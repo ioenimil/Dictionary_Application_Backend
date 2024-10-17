@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # Creating a word
 class CreateWordView(APIView):
     external_api_url = "https://api.dictionaryapi.dev/api/v2/entries/en"  
-    permission_classes = [IsAuthenticated]
+
 
     def check_external_api(self, word):
         try:
@@ -63,7 +63,7 @@ class WordListView(APIView):
 
 # Logic for performing the other operations
 class DeleteWordView(APIView):
-    permission_classes = [IsAuthenticated]
+    
 
     def delete(self, request, id):
         dictionary_entry = get_object_or_404(DictionaryEntry, id=id)
@@ -194,7 +194,7 @@ class WordSearchView(APIView):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 class EditWordView(APIView):
-    permission_classes = [IsAuthenticated]
+    
 
     def patch(self, request, id):
         dictionary_entry = get_object_or_404(DictionaryEntry, id=id)
