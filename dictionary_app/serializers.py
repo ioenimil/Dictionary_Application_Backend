@@ -22,24 +22,28 @@ class PhoneticSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'audio', 'source_url', 'license']
 
 class DefinitionSerializer(serializers.ModelSerializer):
+    definition = serializers.CharField(required=False)
     class Meta:
         model = Definition
         fields = ['id', 'definition', 'synonyms', 'antonyms', 'example'] 
 
 class MeaningSerializer(serializers.ModelSerializer):
-    definitions = DefinitionSerializer(many=True)  
+    definitions = DefinitionSerializer(many=True, required=False) 
     class Meta:
         model = Meaning
         fields = ['id', 'partOfSpeech', 'synonyms', 'antonyms', 'definitions']  
 
 class DictionaryEntrySerializer(serializers.ModelSerializer):
     phonetics = PhoneticSerializer(many=True, required=False)  # Make phonetics optional
-    meanings = MeaningSerializer(many=True)
+    meanings = MeaningSerializer(many=True, required=False)
     license = LicenseSerializer(required=False)
     
     class Meta:
         model = DictionaryEntry
         fields = ['id', 'word', 'phonetics', 'meanings', 'license', 'source_urls']
+        extra_kwargs = {
+            'meanings': {'required': False},  # Make the definition field optional
+        }
 
     def validate_word(self, value):
         print(f"Validating word: {value}") 

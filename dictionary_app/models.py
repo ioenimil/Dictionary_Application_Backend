@@ -50,7 +50,7 @@ class Meaning(models.Model):
 
 class Definition(models.Model):
     meaning = models.ForeignKey(Meaning, on_delete=models.CASCADE, related_name='definitions')
-    definition = models.TextField()
+    definition = models.TextField(blank=True, null=True)
     synonyms = models.JSONField(default=list, blank=True)
     antonyms = models.JSONField(default=list, blank=True)
     example = models.JSONField(default=list, blank=True)
