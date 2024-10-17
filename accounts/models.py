@@ -58,4 +58,11 @@ class User(AbstractBaseUser, PermissionsMixin):
            'refresh_token': str(refresh_token),
            'access_token': str(refresh_token.access_token)
        } 
+       
+class UserLogout(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    logout_time = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.email} logged out at {self.logout_time}"
  

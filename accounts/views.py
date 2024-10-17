@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.permissions import IsAuthenticated
-from .serializers import UserSignupSerializer, UserLoginSerializer
+from .serializers import UserSignupSerializer, UserLoginSerializer, LogOutSerializer
 from drf_yasg.utils import swagger_auto_schema
 class UserRegisterView(APIView):
     @swagger_auto_schema(request_body=UserSignupSerializer)
@@ -61,3 +61,12 @@ class LoginView(APIView):
                 message=f"Login failed due to an unexpected error: {str(e)}",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        serializer = LogOutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'message': 'Log out successful'}, status=status.HTTP_205_RESET_CONTENT)

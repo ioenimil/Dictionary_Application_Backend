@@ -8,6 +8,7 @@ import logging
 from Dictionary.utils.custom_response import APIResponseHandler
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from requests.exceptions import ConnectionError, Timeout, RequestException
 
 logger = logging.getLogger(__name__)
 
@@ -15,20 +16,25 @@ logger = logging.getLogger(__name__)
 # Creating a word
 class CreateWordView(APIView):
     external_api_url = "https://api.dictionaryapi.dev/api/v2/entries/en"  
-    
     permission_classes = [IsAuthenticated]
-    
 
     def check_external_api(self, word):
-        response = requests.get(f"{self.external_api_url}/{word}")
-        if response.status_code == 200:
-            return True
-        return False 
+        try:
+            response = requests.get(f"{self.external_api_url}/{word}")
+            if response.status_code == 200:
+                return True
+        except ConnectionError:
+            return {"error": "No internet connection. Please check your connection and try again."}
+        except Timeout:
+            return {"error": "The request timed out. Please try again later."}
+        except RequestException as e:
+            return {"error": f"An error occurred while fetching the word: {str(e)}"}
+        return False
 
     def post(self, request):
-        word = request.data.get('word')
+        word = request.data.get('word').lower() 
         print(f"Request data: {request.data}") 
-        
+  
         if self.check_external_api(word):
             return Response({"error": "Word already exists in the external dictionary."},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -37,13 +43,15 @@ class CreateWordView(APIView):
             return Response({"error": "Word already exists in the database."},
                             status=status.HTTP_400_BAD_REQUEST)
 
+        # Serialize and save the word in lowercase
+        request.data['word'] = word  # Ensure the lowercase word is saved
         serializer = DictionaryEntrySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
  # Getting all the words   
 class WordListView(APIView):
     def get(self, request):
@@ -102,7 +110,7 @@ class WordSearchView(APIView):
             if not api_data or not isinstance(api_data, list):
                 return APIResponseHandler.api_response(
                     success=False,
-                    message="Word not found in the external API. Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again later or head to the web instead.",
+                    message="Sorry pal, we couldn't find definitions for the word you were looking for. You can try the search again later or head to the web instead.",
                     status_code=status.HTTP_404_NOT_FOUND
                 )
 

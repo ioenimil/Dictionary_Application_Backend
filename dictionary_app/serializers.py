@@ -46,9 +46,9 @@ class DictionaryEntrySerializer(serializers.ModelSerializer):
         if len(value) < 3:
             raise serializers.ValidationError('Word must be at least 3 characters long.')
         if value.isdigit():
-            raise serializers.ValidationError('Word cannot contain only numbers.')
+            raise serializers.ValidationError('Input cannot contain only numbers. Please enter a valid word')
         if re.fullmatch(special_characters_pattern, value):
-            raise serializers.ValidationError('Word cannot contain only special characters.')
+            raise serializers.ValidationError('Input cannot contain only special characters. Please enter a valid word')
         return value
 
 
