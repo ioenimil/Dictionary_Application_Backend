@@ -58,7 +58,7 @@ class LoginView(APIView):
         except Exception as e:
             return APIResponseHandler.api_response(
                 success=False,
-                message=f"Login failed due to an unexpected error: {str(e)}",
+                message=f"Login failed. Invalid Credentials.",
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
             
