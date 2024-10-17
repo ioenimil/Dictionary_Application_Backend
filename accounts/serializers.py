@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, UserLogout
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
