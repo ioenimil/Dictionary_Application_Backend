@@ -6,7 +6,7 @@ from .serializers import DictionaryEntrySerializer
 import requests
 import logging
 from Dictionary.utils.custom_response import APIResponseHandler
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from requests.exceptions import ConnectionError, Timeout, RequestException
 
@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 # Creating a word
 class CreateWordView(APIView):
     external_api_url = "https://api.dictionaryapi.dev/api/v2/entries/en"  
-
-
     def check_external_api(self, word):
         try:
             response = requests.get(f"{self.external_api_url}/{word}")
@@ -47,7 +45,7 @@ class CreateWordView(APIView):
         request.data['word'] = word  # Ensure the lowercase word is saved
         serializer = DictionaryEntrySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save(user=request.user)
+            serializer.save(user=request.user if request.user.is_authenticated else None)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -63,8 +61,6 @@ class WordListView(APIView):
 
 # Logic for performing the other operations
 class DeleteWordView(APIView):
-    
-
     def delete(self, request, id):
         dictionary_entry = get_object_or_404(DictionaryEntry, id=id)
         dictionary_entry.delete()
@@ -194,8 +190,6 @@ class WordSearchView(APIView):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 class EditWordView(APIView):
-    
-
     def patch(self, request, id):
         dictionary_entry = get_object_or_404(DictionaryEntry, id=id)
         serializer = DictionaryEntrySerializer(dictionary_entry, data=request.data, partial=True)
