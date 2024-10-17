@@ -64,7 +64,7 @@ class DictionaryEntry(models.Model):
     meanings = models.ManyToManyField(Meaning, related_name='dictionary_entries')
     license = models.ForeignKey(License, on_delete=models.SET_NULL, null=True, related_name='dictionary_entries')  # Allow null
     source_urls = models.JSONField(default=list, blank=True)  # Allow blank and null
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='dictionary_entries') 
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='dictionary_entries') 
 
     def __str__(self):
         return self.word
